@@ -1,7 +1,11 @@
+/* =========================
+   MOBILE MENU
+========================= */
+
 const menuIcon = document.querySelector(".menu-icon");
 const navbar = document.querySelector(".navbar");
 
-if (menuIcon) {
+if (menuIcon && navbar) {
 
     menuIcon.addEventListener("click", () => {
 
@@ -9,12 +13,14 @@ if (menuIcon) {
 
         const icon = menuIcon.querySelector("i");
 
-        if (navbar.classList.contains("active")) {
-            icon.classList.remove("fa-bars");
-            icon.classList.add("fa-xmark");
-        } else {
-            icon.classList.remove("fa-xmark");
-            icon.classList.add("fa-bars");
+        if (icon) {
+            if (navbar.classList.contains("active")) {
+                icon.classList.remove("fa-bars");
+                icon.classList.add("fa-xmark");
+            } else {
+                icon.classList.remove("fa-xmark");
+                icon.classList.add("fa-bars");
+            }
         }
 
     });
@@ -22,7 +28,9 @@ if (menuIcon) {
 }
 
 
-/* ================= CLOSE MENU ================= */
+/* =========================
+   CLOSE MOBILE MENU
+========================= */
 
 const navLinks = document.querySelectorAll(".navbar a");
 
@@ -30,7 +38,9 @@ navLinks.forEach(link => {
 
     link.addEventListener("click", () => {
 
-        navbar.classList.remove("active");
+        if (navbar) {
+            navbar.classList.remove("active");
+        }
 
         const icon = menuIcon?.querySelector("i");
 
@@ -44,7 +54,9 @@ navLinks.forEach(link => {
 });
 
 
-/* ================= READ MORE ================= */
+/* =========================
+   READ MORE / READ LESS
+========================= */
 
 const readMoreBtn = document.getElementById("readMoreBtn");
 const moreAbout = document.getElementById("moreAbout");
@@ -53,69 +65,70 @@ if (readMoreBtn && moreAbout) {
 
     readMoreBtn.addEventListener("click", () => {
 
-        moreAbout.classList.toggle("show");
+        const isOpen = moreAbout.classList.toggle("show");
 
-        if (moreAbout.classList.contains("show")) {
-
-            readMoreBtn.textContent = "Read Less";
-
-        } else {
-
-            readMoreBtn.textContent = "Read More";
-
-        }
+        readMoreBtn.textContent = isOpen
+            ? "Read Less"
+            : "Read More";
 
     });
 
 }
 
 
-/* ================= ACTIVE NAVBAR ================= */
+/* =========================
+   ACTIVE NAVBAR ON SCROLL
+========================= */
 
 const sections = document.querySelectorAll("section");
 
-window.addEventListener("scroll", () => {
+function updateActiveNav() {
 
     let current = "";
 
     sections.forEach(section => {
 
-        const sectionTop = section.offsetTop - 150;
-
+        const sectionTop = section.offsetTop - 180;
         const sectionHeight = section.offsetHeight;
 
         if (
             window.scrollY >= sectionTop &&
             window.scrollY < sectionTop + sectionHeight
         ) {
-
             current = section.getAttribute("id");
-
         }
 
     });
-
 
     navLinks.forEach(link => {
 
         link.classList.remove("active");
 
-        if (link.getAttribute("href") === "#" + current) {
-
+        if (
+            current &&
+            link.getAttribute("href") === "#" + current
+        ) {
             link.classList.add("active");
-
         }
 
     });
 
-});
+}
+
+window.addEventListener("scroll", updateActiveNav);
+
+updateActiveNav();
 
 
-/* ================= HEADER SHADOW ================= */
+/* =========================
+   HEADER SHADOW
+========================= */
 
 const header = document.querySelector(".header");
 
-window.addEventListener("scroll", () => {
+function updateHeader() {
+
+    if (!header) return;
 
     if (window.scrollY > 50) {
 
@@ -128,45 +141,80 @@ window.addEventListener("scroll", () => {
 
     }
 
-});
+}
+
+window.addEventListener("scroll", updateHeader);
+
+updateHeader();
 
 
-/* ================= SCROLL REVEAL ================= */
+/* =========================
+   SCROLL REVEAL
+========================= */
 
 const revealElements = document.querySelectorAll(
-    ".section-title, .about-text, .skill-card, .project-card, .timeline-item, .contact-info, .contact-form"
+    ".section-title, " +
+    ".about-text, " +
+    ".skill-card, " +
+    ".project-card, " +
+    ".timeline-item, " +
+    ".contact-info, " +
+    ".contact-form"
 );
 
-const revealObserver = new IntersectionObserver(
-    (entries) => {
+if ("IntersectionObserver" in window) {
 
-        entries.forEach(entry => {
+    const revealObserver = new IntersectionObserver(
+        (entries, observer) => {
 
-            if (entry.isIntersecting) {
+            entries.forEach(entry => {
 
-                entry.target.classList.add("reveal");
+                if (entry.isIntersecting) {
 
-                revealObserver.unobserve(entry.target);
+                    entry.target.classList.add(
+                        "reveal",
+                        "active"
+                    );
 
-            }
+                    observer.unobserve(entry.target);
 
-        });
+                }
 
-    },
-    {
-        threshold: 0.15
-    }
-);
+            });
+
+        },
+        {
+            threshold: 0.15
+        }
+    );
+
+    revealElements.forEach(element => {
+
+        element.classList.add("reveal");
+
+        revealObserver.observe(element);
+
+    });
+
+} else {
+
+    // Fallback for older browsers
+
+    revealElements.forEach(element => {
+
+        element.classList.add(
+            "reveal",
+            "active"
+        );
+
+    });
+
+}
 
 
-revealElements.forEach(element => {
-
-    revealObserver.observe(element);
-
-});
-
-
-/* ================= CONTACT FORM ================= */
+/* =========================
+   CONTACT FORM
+========================= */
 
 const contactForm = document.querySelector(".contact-form");
 
@@ -181,8 +229,71 @@ if (contactForm) {
             button.innerHTML =
                 '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
 
+            button.disabled = true;
+
         }
 
     });
 
 }
+
+
+/* =========================
+   SMOOTH SCROLL
+========================= */
+
+navLinks.forEach(link => {
+
+    link.addEventListener("click", event => {
+
+        const targetId = link.getAttribute("href");
+
+        if (
+            targetId &&
+            targetId.startsWith("#")
+        ) {
+
+            const target = document.querySelector(targetId);
+
+            if (target) {
+
+                event.preventDefault();
+
+                target.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+            }
+
+        }
+
+    });
+
+});
+
+
+/* =========================
+   ESC KEY CLOSE MENU
+========================= */
+
+document.addEventListener("keydown", event => {
+
+    if (event.key === "Escape") {
+
+        if (navbar) {
+            navbar.classList.remove("active");
+        }
+
+        const icon = menuIcon?.querySelector("i");
+
+        if (icon) {
+
+            icon.classList.remove("fa-xmark");
+            icon.classList.add("fa-bars");
+
+        }
+
+    }
+
+});
